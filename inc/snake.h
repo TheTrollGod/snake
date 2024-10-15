@@ -40,7 +40,6 @@ private:
     int boardCords[15][15][2];          // Game board is 15 x 15, which is 225 total slots. Need to make it a 3d array to give each spot coordinates.
                                         // boardCords[14][14][0] is the last column and last row of the grid and would give the X cord
                                         // boardCords[14][14][1] is the last column and last row of the grid and would give the y cord
-    std::string board[15][15];
 
     // Array to store current cords for the player
     std::vector<int[2]> playerCords;    // Makes a vector that only accepts 1x2 arrarys
