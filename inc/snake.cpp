@@ -33,7 +33,7 @@ void snake::setupBoard() {
 
 
 void snake::getFruit() {
-    std::vector<int[2]> unOccupiedCords;
+    std::vector<std::array<int, 2>> unOccupiedCords;
     // Iterates through the game board
     for(int i = 0; i < 15; i ++) {
         for(int j = 0; j < 15; j++) {
@@ -144,7 +144,22 @@ void snake::move() {
     }
 }
 
-
+void snake::collisions() {
+    // Checks for collision with walls and fruits
+    if (headCords[0] == fruitCord[0] && headCords[1] == fruitCord[1]) {
+        // Add points for fruit
+        points += 1;
+        getFruit();
+        extendSnake = true;
+        return;
+    }
+    // Checks the entire arrary is the head collides with the body
+    for (int i =0; i < playerCords.size(); i++) {
+        if (headCords[0] == playerCords[i][0] && headCords[1] == playerCords[i][1]) {
+            isLoop = false;
+        }
+    }
+}
 
 
 
