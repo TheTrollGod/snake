@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <conio.h>
+#include <array>
 #include <vector>
 
 #ifndef SNAKE_H
@@ -42,12 +43,14 @@ private:
                                         // boardCords[14][14][1] is the last column and last row of the grid and would give the y cord
 
     // Array to store current cords for the player
-    std::vector<int[2]> playerCords;    // Makes a vector that only accepts 1x2 arrarys
+    std::vector<std::array<int, 2>> playerCords;    // Makes a vector that only accepts 1x2 arrarys
     int headCords[2] = {8,8};
 
     // Current direction of the player
     // Use east as 0
     enum direction {east = 0, west, north, south};
+    //initalize the default game state
+    direction snakeDirection = south;
 
     // Fruit Generation
     void getFruit();            // Calculates the coordinates for each fruit

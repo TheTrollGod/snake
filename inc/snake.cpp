@@ -39,7 +39,7 @@ void snake::getFruit() {
         for(int j = 0; j < 15; j++) {
             // Iterates through the snake body to see if it ocupies the game board
             for (int k = 0; k < playerCords.size(); k++) {
-                if (boardCords[i][j] != playerCords[k]) {
+                if (boardCords[i][j][0] != playerCords[k][0] && boardCords[i][j][1] != playerCords[k][1]) {
                     //inserts the unocupied cordinate into the vector
                     unOccupiedCords.push_back({j,i});
                 }
@@ -62,7 +62,7 @@ void snake::drawBoard() {
     std::ostringstream out;
     // use ostream to add all the game objects and update the board once
 
-    // Itterates through
+    // Itterates through the entire board
     for(int i = 0; i < 15; i++) {
         for(int j =0; j < 15; j++) {
 
@@ -80,6 +80,7 @@ void snake::drawBoard() {
 
             //uses this bool to make sure the body is counted correctly
             bool isSnakeBody = false;
+            //Is the snake there?
             for (int k = 0; k < playerCords.size(); k++) {
                 if (playerCords[k][0] == j && playerCords[k][1] == i) {
                     out << "[]";
@@ -97,7 +98,7 @@ void snake::drawBoard() {
         out << std::endl;
     }
 
-    //Print the entire display
+    // Print the entire display
     std::cout << out.str();
 }
 
@@ -107,6 +108,41 @@ void snake::drawBoard() {
 //  void start();
 //  void die();
 
+void snake::move() {
+    // Add the head coordinate to the body coordinate
+    playerCords.push_back({headCords[0], headCords[1]});
+
+    // Sees if the snake needs to extend
+    if (extendSnake == false) {
+        // Remove the cords of the head from the coordinates if it does not extend
+        playerCords.erase(playerCords.begin());
+    }
+    else {
+        extendSnake = false;
+    }
+
+    // Add direction to the head
+    if (snakeDirection == north && headCords[1] - 1 >= 0) {
+        // Move north (up) by decreasing the y-coordinate
+        headCords[1] -= 1;
+    }
+    else if (snakeDirection == east && headCords[0] + 1 <= 14) {
+        // Move east (right) by increasing the x-coordinate
+        headCords[0] += 1;
+    }
+    else if (snakeDirection == south && headCords[1] + 1 <= 14) {
+        // Move south (down) by increasing the y-coordinate
+        headCords[1] += 1;
+    }
+    else if (snakeDirection == west && headCords[0] - 1 >= 0) {
+        // Move west (left) by decreasing the x-coordinate
+        headCords[0] -= 1;
+    }
+    else {
+        // If none of the directions can be moved, stop the loop
+        isLoop = false;
+    }
+}
 
 
 
@@ -115,9 +151,9 @@ void snake::drawBoard() {
 
 //Googled how to do this because I know that some people use Unix :)
 void clearScreen() {
-#if defined(_WIN32) || defined(_WIN64)  //Checks for windows
-    system("cls");
-#else //Unix
-    system("clear");
-#endif
+    #if defined(_WIN32) || defined(_WIN64)  //Checks for windows
+        system("cls");
+    #else //Unix
+        system("clear");
+    #endif
 }
