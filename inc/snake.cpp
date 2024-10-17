@@ -262,7 +262,7 @@ void snake::start() {
     std::cout << "\n \n \nControls: \nUse WSAD to control the snake. Press Q to exit the game " << std::endl;
     std::cout << "Press enter to continue" << std::endl;
     // Just waits for enter key??
-    std::cin >> i_dont_care;
+    std::cin.ignore();
 
 
     // Start the game
@@ -278,7 +278,7 @@ void snake::start() {
     // Game end
     clearScreen();
     std::cout << "\n\n\nYou got " << points << " points!\nPress 'enter' to exit" << std::endl;
-    std::cin >> i_dont_care;
+    std::cin.ignore();
 
 }
 //Googled how to do this because I know that some people use Unix :)
