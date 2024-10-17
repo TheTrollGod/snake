@@ -7,8 +7,72 @@
 #include <sstream>
 #include <cstdlib>
 
+//Compatability stuff that I had to look up
+#ifdef _WIN32
+    // Windows systems
+    #include <conio.h>
+    #include <windows.h>
+
+snake::direction getDirection() {
+    if (_kbhit()) {
+        switch (_getch()) {
+            case 'w': return snake::north;
+            case 'd': return snake::east;
+            case 's': return snake::south;
+            case 'a': return snake::west;  // Corrected to west
+            // Exit case
+            case 'q': exit(0);
+            // In case things break, you go up :)
+            default: return snake::north;
+        }
+    }
+    return snake::north;  // Return a default direction if no key is pressed
+}
+#else
+//Unix systems
+#include <unistd.h>
+
+void setNonBlocking(bool enable) {
+        struct termios ttystate;
+        tcgetattr(STDIN_FILENO, &ttystate);
+
+        if (enable) {
+            ttystate.c_lflag &= ~ICANON;  // Turn off canonical mode
+            ttystate.c_cc[VMIN] = 1;      // Minimum of 1 character
+        } else {
+            ttystate.c_lflag |= ICANON;   // Restore canonical mode
+        }
+        tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    }
+
+Direction getDirection() {
+        setNonBlocking(true);
+        int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+
+        int ch = getchar();
+        setNonBlocking(false);
+
+        switch (ch) {
+            case 'w': return NORTH;
+            case 'd': return EAST;
+            case 's': return SOUTH;
+            case 'a': return WEST;
+            case 'q': exit(0);
+            default: ;
+        }
+    }
+
+#endif
+
+
+
+
+
 // Initalize the clearScreen function
 void clearScreen();
+void sleepPlease(float);
+
 
 // Class constructor
 snake::snake() {
@@ -34,24 +98,28 @@ void snake::setupBoard() {
 
 void snake::getFruit() {
     std::vector<std::array<int, 2>> unOccupiedCords;
-    // Iterates through the game board
-    for(int i = 0; i < 15; i ++) {
-        for(int j = 0; j < 15; j++) {
-            // Iterates through the snake body to see if it ocupies the game board
-            for (int k = 0; k < playerCords.size(); k++) {
-                if (boardCords[i][j][0] != playerCords[k][0] && boardCords[i][j][1] != playerCords[k][1]) {
-                    //inserts the unocupied cordinate into the vector
-                    unOccupiedCords.push_back({j,i});
+    for (int i = 0; i < 15; i++) {
+        for (int j = 0; j < 15; j++) {
+            bool occupied = false;  // Track if the current coordinate is occupied
+            for (const auto& coord : playerCords) {
+                if (boardCords[i][j][0] == coord[0] && boardCords[i][j][1] == coord[1]) {
+                    occupied = true;  // Coordinate is occupied
+                    break;
                 }
+            }
+            if (!occupied) {
+                unOccupiedCords.push_back({j, i});
             }
         }
     }
-    // Get a random location
-    int randomIndex = std::rand() % unOccupiedCords.size() - 1;
-    // Get random space and assign it to the fruit coordinate
-    fruitCord[0] = unOccupiedCords[randomIndex][0];
-    fruitCord[1] = unOccupiedCords[randomIndex][1];
+    // Get a random location only if unOccupiedCords is not empty
+    if (!unOccupiedCords.empty()) {
+        int randomIndex = std::rand() % unOccupiedCords.size();  // Ensure random index is valid
+        fruitCord[0] = unOccupiedCords[randomIndex][0];
+        fruitCord[1] = unOccupiedCords[randomIndex][1];
+    }
 }
+
 
 
 void snake::drawBoard() {
@@ -103,12 +171,13 @@ void snake::drawBoard() {
 }
 
 // TODO:
-//  void move();
-//  void collisions();
 //  void start();
 //  void die();
 
 void snake::move() {
+    //Assign direction to the snake
+    snakeDirection = getDirection();
+
     // Add the head coordinate to the body coordinate
     playerCords.push_back({headCords[0], headCords[1]});
 
@@ -161,9 +230,57 @@ void snake::collisions() {
     }
 }
 
+void snake::start() {
+    // Dummy vairable
+    std::string i_dont_care;
+
+    // ASCI art for game start screen
+
+    std::string intro[18] = {" _______  _        _______  _        _______                ",
+        "(  ____ \\( (    /|(  ___  )| \\    /\\(  ____ \\               ",
+        "| (    \\/|  \\  ( || (   ) ||  \\  / /| (    \\/               ",
+        "| (_____ |   \\ | || (___) ||  (_/ / | (__                   ",
+        "(_____  )| (\\ \\) ||  ___  ||   _ (  |  __)                  ",
+        "      ) || | \\   || (   ) ||  ( \\ \\ | (                     ",
+        "/\\____) || )  \\  || )   ( ||  /  \\ \\| (____/\\               ",
+        "\\_______)|/    )_)|/     \\||_/    \\/(_______/               ",
+        "                                                            ",
+        "____  ____  ____  ____  ____  ____  ____  ____  _        _ ",
+        "(  __)(__  )(  __)(__  )(  __)(__  )(  __)(__  )( \\      / )",
+        "| (      ) || (      ) || (      ) || (      ) | \\ \\    / / ",
+        "| |      | || |      | || |      | || |      | |  \\ \\  / /  ",
+        "| |      | || |      | || |      | || |      | |   ) )( (   ",
+        "| |      | || |      | || |      | || |      | |  / /  \\ \\  ",
+        "| (__  __) || (__  __) || (__  __) || (__  __) | / /    \\ \\ ",
+        "(____)(____)(____)(____)(____)(____)(____)(____)(_/      \\_)"};
 
 
+    for (int i = 0; i < 18; i++) {
+        std::cout << intro[i] << std::endl;
+        sleepPlease(0.2);
+    }
+    std::cout << "\n \n \nControls: \nUse WSAD to control the snake. Press Q to exit the game " << std::endl;
+    std::cout << "Press enter to continue" << std::endl;
+    // Just waits for enter key??
+    std::cin >> i_dont_care;
 
+
+    // Start the game
+    do {
+        clearScreen();
+        move();
+        collisions();
+        drawBoard();
+        sleepPlease(refreshRate);
+    }
+    while (isLoop);
+
+    // Game end
+    clearScreen();
+    std::cout << "\n\n\nYou got " << points << " points!\nPress 'enter' to exit" << std::endl;
+    std::cin >> i_dont_care;
+
+}
 //Googled how to do this because I know that some people use Unix :)
 void clearScreen() {
     #if defined(_WIN32) || defined(_WIN64)  //Checks for windows
@@ -172,3 +289,15 @@ void clearScreen() {
         system("clear");
     #endif
 }
+
+// Why is there different syntax for sleep between windows and Unix???
+// Why the hell is it not the same????
+// Why cant it have this stuff in the first place ????
+void sleepPlease(float time) {
+#if defined(_WIN32) || defined(_WIN64)
+    Sleep(time);
+#else
+    sleep(time);
+#endif
+}
+

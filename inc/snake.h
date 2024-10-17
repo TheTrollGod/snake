@@ -3,8 +3,6 @@
 //
 #include <string>
 #include <iostream>
-#include <string>
-#include <conio.h>
 #include <array>
 #include <vector>
 
@@ -23,6 +21,8 @@ public:
     // Constructor
     snake();
 
+    enum direction {east = 0, west, north, south};
+
     // Game setup
     void setupBoard();
 
@@ -32,7 +32,6 @@ public:
     void move();
     void collisions();
     void start();
-    void die();
 
 
 private:
@@ -48,7 +47,7 @@ private:
 
     // Current direction of the player
     // Use east as 0
-    enum direction {east = 0, west, north, south};
+
     //initalize the default game state
     direction snakeDirection = south;
 

@@ -8,6 +8,5 @@
 int main () {
     snake snakeGame;
     snakeGame.start();
-    snakeGame.die();
     return 0;
 }
