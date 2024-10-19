@@ -2,10 +2,15 @@
 // Created by TheTrollGod on 10/14/2024.
 //
 
+#include <windows.h>
 #include "snake.h"
 #include <random>
 #include <sstream>
 #include <cstdlib>
+
+// Initalize additinal functions
+void clearScreen();
+void sleepPlease(float);
 
 //Compatability stuff that I had to look up
 #ifdef _WIN32
@@ -13,66 +18,59 @@
     #include <conio.h>
     #include <windows.h>
 
-snake::direction getDirection() {
+snake::direction snake::getDirection() {
     if (_kbhit()) {
-        switch (_getch()) {
+        char key = _getch();
+        switch (key) {
             case 'w': return snake::north;
             case 'd': return snake::east;
             case 's': return snake::south;
-            case 'a': return snake::west;  // Corrected to west
+            case 'a': return snake::west;
             // Exit case
             case 'q': exit(0);
+
             // In case things break, you go up :)
-            default: return snake::north;
+            default: return snakeDirection;
         }
     }
-    return snake::north;  // Return a default direction if no key is pressed
+    return snakeDirection;  // Return a default direction if no key is pressed
 }
 #else
 //Unix systems
 #include <unistd.h>
 
 void setNonBlocking(bool enable) {
-        struct termios ttystate;
-        tcgetattr(STDIN_FILENO, &ttystate);
+    struct termios ttystate;
+    tcgetattr(STDIN_FILENO, &ttystate);
 
-        if (enable) {
-            ttystate.c_lflag &= ~ICANON;  // Turn off canonical mode
-            ttystate.c_cc[VMIN] = 1;      // Minimum of 1 character
-        } else {
-            ttystate.c_lflag |= ICANON;   // Restore canonical mode
-        }
-        tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    if (enable) {
+        ttystate.c_lflag &= ~ICANON;  // Turn off canonical mode
+        ttystate.c_cc[VMIN] = 1;      // Minimum of 1 character
+    } else {
+        ttystate.c_lflag |= ICANON;   // Restore canonical mode
     }
+    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+}
 
 Direction getDirection() {
-        setNonBlocking(true);
-        int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+    setNonBlocking(true);
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
 
-        int ch = getchar();
-        setNonBlocking(false);
+    int ch = getchar();
+    setNonBlocking(false);
 
-        switch (ch) {
-            case 'w': return NORTH;
-            case 'd': return EAST;
-            case 's': return SOUTH;
-            case 'a': return WEST;
-            case 'q': exit(0);
-            default: ;
-        }
+    switch (ch) {
+        case 'w': return NORTH;
+        case 'd': return EAST;
+        case 's': return SOUTH;
+        case 'a': return WEST;
+        case 'q': exit(0);
+        default: ;
     }
+}
 
 #endif
-
-
-
-
-
-// Initalize the clearScreen function
-void clearScreen();
-void sleepPlease(float);
-
 
 // Class constructor
 snake::snake() {
@@ -124,7 +122,6 @@ void snake::getFruit() {
 
 void snake::drawBoard() {
     //Clear the screen to prepare the newboard
-    clearScreen();
 
     // Creates a variable for the ostream to add to
     std::ostringstream out;
@@ -166,13 +163,11 @@ void snake::drawBoard() {
         out << std::endl;
     }
 
-    // Print the entire display
+    // Print the entire display; Clears the screen before printing it.
+    clearScreen();
     std::cout << out.str();
 }
 
-// TODO:
-//  void start();
-//  void die();
 
 void snake::move() {
     //Assign direction to the snake
@@ -234,6 +229,9 @@ void snake::start() {
     // Dummy vairable
     std::string i_dont_care;
 
+    //clear the screen for the start of the game
+    clearScreen();
+
     // ASCI art for game start screen
 
     std::string intro[18] = {" _______  _        _______  _        _______                ",
@@ -266,14 +264,13 @@ void snake::start() {
 
 
     // Start the game
-    do {
-        clearScreen();
-        move();
+    while (isLoop) {
         collisions();
+        move();
         drawBoard();
         sleepPlease(refreshRate);
+
     }
-    while (isLoop);
 
     // Game end
     clearScreen();
@@ -281,14 +278,31 @@ void snake::start() {
     std::cin.ignore();
 
 }
+
+
 //Googled how to do this because I know that some people use Unix :)
 void clearScreen() {
-    #if defined(_WIN32) || defined(_WIN64)  //Checks for windows
-        system("cls");
-    #else //Unix
-        system("clear");
-    #endif
+
+#if defined(_WIN32) || defined(_WIN64)
+    /*
+    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hStdOut, &csbi);
+    DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+    DWORD count;
+
+    COORD homeCoords = {0, 0};
+
+    FillConsoleOutputCharacter(hStdOut, (TCHAR) ' ', cellCount, homeCoords, &count);
+    SetConsoleCursorPosition(hStdOut, homeCoords);
+    */
+    system("CLS");
+#else
+    system("clear");
+#endif
 }
+
+
 
 // Why is there different syntax for sleep between windows and Unix???
 // Why the hell is it not the same????
@@ -296,6 +310,9 @@ void clearScreen() {
 void sleepPlease(float time) {
 #if defined(_WIN32) || defined(_WIN64)
     Sleep(time);
+#ifdef DEBUG
+    std::cout << "Win sleep" << std::endl;
+#endif
 #else
     sleep(time);
 #endif

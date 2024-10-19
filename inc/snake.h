@@ -32,6 +32,7 @@ public:
     void move();
     void collisions();
     void start();
+    direction getDirection();
 
 
 private:
@@ -58,7 +59,9 @@ private:
     // Loop Controls
     bool isLoop = true;
     bool extendSnake = false;
-    float refreshRate = 0.4;    // Change this to adjust the refresh rate (how fast the snake moves)
+    float refreshRate = 500
+
+    ;    // Change this to adjust the refresh rate (how fast the snake moves)
 
 };
 
