@@ -66,14 +66,17 @@ This Snake game was created by TheTrollGod. It features a 15x15 game board, and 
 
 Alternatively, you can compile using `g++`:
 
-1. Compile the game:
+1. Set compilation the game:
     ```bash
-    g++ -o snake_game src/main.cpp src/snake.cpp -std=c++14
+    cmake -G "MinGW Makefiles" .
     ```
-
-2. Run the game:
+2. Compile the game:
     ```bash
-    ./snake_game
+    mingw32-make
+    ```
+3. Run the game:
+    ```bash
+    snake.exe
     ```
 
 ### Unix/Linux (using g++)
