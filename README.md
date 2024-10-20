@@ -45,8 +45,15 @@ This Snake game was created by TheTrollGod. It features a 15x15 game board, and 
     git clone https://github.com/TheTrollGod/snake
     cd snake
     ```
+2. Edit the Cmake list
+    Edit the CMakeLists file to include the compilers.
+    Include the paths to your compilers in the following lines of code:
+    ```
+    set(CMAKE_CXX_COMPILER "/pathto/g++")
+    set(CMAKE_C_COMPILER "/pathto/gcc")
+    ```
 
-2. Build the game using CMake:
+4. Build the game using CMake:
     ```bash
     mkdir snake/build
     cd build
@@ -54,7 +61,7 @@ This Snake game was created by TheTrollGod. It features a 15x15 game board, and 
     make
     ```
 
-3. Run the game:
+5. Run the game:
     ```bash
    Unix:
     ./snake
